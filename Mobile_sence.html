@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>iPhone 13の加速度センサーをCSVファイルに保存する</title>
+  </head>
+  <body>
+    <h1>iPhone 13の加速度センサーをCSVファイルに保存する</h1>
+    <p>以下のボタンをクリックして、加速度センサーのデータを収集し、CSVファイルに保存してください。</p>
+    <button id="start-button">センサーを開始する</button>
+
+    <script>
+      // 加速度センサーを取得する
+      const accelerometer = new Accelerometer({ frequency: 60 });
+
+      // ボタンをクリックして、加速度センサーを開始する
+      const startButton = document.getElementById("start-button");
+      startButton.addEventListener("click", () => {
+        // 加速度センサーが有効かどうかを確認する
+        if (Accelerometer) {
+          // 加速度センサーが有効な場合は、加速度の値を取得し、CSVファイルに書き込む
+          accelerometer.addEventListener("reading", () => {
+            const data = `${accelerometer.x},${accelerometer.y},${accelerometer.z}\n`;
+            writeToCSV(data);
+          });
+          // 加速度センサーのサンプリングを開始する
+          accelerometer.start();
+        } else {
+          console.log("加速度センサーはサポートされていません");
+        }
+      });
+
+      // CSVファイルにデータを書き込む
+      function writeToCSV(data) {
+        // CSVファイルに書き込むためのBlobオブジェクトを作成する
+        const blob = new Blob([data], { type: "text/csv" });
+
+        // ダウンロードするためのURLを作成する
+        const url = URL.createObjectURL(blob);
+
+        // ダウンロード用のリンクを作成する
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", "accelerometer_data.csv");
+        link.style.display = "none";
+
+        // リンクをクリックしてダウンロードする
+        document.body.appendChild(link);
+        link.click();
+
+        // ダウンロードが完了したら、リンクを削除する
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
+    </script>
+  </body>
+</html>
