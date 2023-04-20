@@ -11,13 +11,26 @@
 
     <script>
       // 加速度センサーを取得する
-      const accelerometer = new Accelerometer({ frequency: 60 });
+      let accelerometer = null;
+      if (typeof(DeviceMotionEvent) !== "undefined" && typeof(DeviceMotionEvent.requestPermission) === "function") {
+        DeviceMotionEvent.requestPermission().then(permissionState => {
+          if (permissionState === "granted") {
+            // 許可された場合、加速度センサーを取得する
+            accelerometer = new Accelerometer({ frequency: 60 });
+          } else {
+            console.log("加速度センサーの使用が許可されていません");
+          }
+        }).catch(console.error);
+      } else {
+        // DeviceMotionEventが定義されていない場合、加速度センサーはサポートされていません
+        console.log("加速度センサーはサポートされていません");
+      }
 
       // ボタンをクリックして、加速度センサーを開始する
       const startButton = document.getElementById("start-button");
       startButton.addEventListener("click", () => {
         // 加速度センサーが有効かどうかを確認する
-        if (Accelerometer) {
+        if (accelerometer) {
           // 加速度センサーが有効な場合は、加速度の値を取得し、CSVファイルに書き込む
           accelerometer.addEventListener("reading", () => {
             const data = `${accelerometer.x},${accelerometer.y},${accelerometer.z}\n`;
@@ -38,8 +51,8 @@
         // ダウンロードするためのURLを作成する
         const url = URL.createObjectURL(blob);
 
-        // ダウンロード用のリンクを作成する
-        const link = document.createElement("a");
+       // ダウンロード用のリンクを作成する
+       const link = document.createElement("a");
         link.setAttribute("href", url);
         link.setAttribute("download", "accelerometer_data.csv");
         link.style.display = "none";
@@ -54,4 +67,4 @@
       }
     </script>
   </body>
-</html>
+</html
